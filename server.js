@@ -289,6 +289,25 @@ app.delete('/api/goals/:id', requireAuth, async (req, res) => {
   catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+/* ══ SEED ENDPOINT (llamar una sola vez) ════════════════════════════════ */
+app.get('/api/seed', async (req, res) => {
+  if (!HAS_DB) return res.status(503).json({ error: 'Sin base de datos' });
+  try {
+    const { count } = await sb.from('date_ideas').select('*', { count: 'exact', head: true });
+    if (count > 0) return res.json({ ok: true, message: `Ya hay ${count} ideas de citas. No se volvió a insertar.` });
+
+    const DEMO = '💕 Ejemplo';
+    await sb.from('date_ideas').insert(DATE_IDEAS_SEED.map(d => ({ ...d, done: false, created_by: 'demo', display_name: DEMO })));
+    await sb.from('wishlist').insert(WISHLIST_SEED.map(d => ({ ...d, purchased: false, created_by: 'demo', display_name: DEMO })));
+    await sb.from('talks').insert(TALKS_SEED.map(d => ({ ...d, resolved: false, created_by: 'demo', display_name: DEMO })));
+    await sb.from('goals').insert(GOALS_SEED.map(d => ({ ...d, created_by: 'demo', display_name: DEMO })));
+
+    res.json({ ok: true, message: '✅ Datos de ejemplo insertados correctamente' });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ══ SPA ════════════════════════════════════════════════════════════════ */
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
