@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuestro Espacio 💕</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <header id="main-header">
+    <div class="header-inner">
+      <button id="logo-home-btn" class="logo-btn">Nuestro Espacio <span>💕</span></button>
+
+      <!-- Horizontal nav with dividers -->
+      <nav class="main-nav" id="main-nav">
+        <button class="nav-link" data-section="dates">💑 Citas</button>
+        <span class="nav-sep"></span>
+        <button class="nav-link" data-section="wishlist">🛍️ Deseos</button>
+        <span class="nav-sep"></span>
+        <button class="nav-link" data-section="talks">💬 Charlas</button>
+        <span class="nav-sep"></span>
+        <button class="nav-link" data-section="savings">✈️ Ahorros</button>
+        <span class="nav-sep"></span>
+        <button class="nav-link" data-section="goals">🎯 Metas</button>
+      </nav>
+
+      <div id="auth-area">
+        <button id="btn-login-open" class="btn-outline">Iniciar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════════════════════ -->
+  <main>
+
+    <!-- ── HOME LANDING ──────────────────────────────────────────────── -->
+    <section id="section-home" class="section active">
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hero-overlay"></div>
+        <div class="orchid-deco">
+          <!-- Decorative SVG orchids (left) -->
+          <svg class="orchid orchid-left" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+            <!-- stem -->
+            <path d="M100 380 Q95 300 100 200 Q105 120 110 60" stroke="#B8D4E8" stroke-width="3" fill="none" opacity=".6"/>
+            <!-- flower 1 -->
+            <ellipse cx="110" cy="60" rx="22" ry="12" fill="#E8F4FE" opacity=".85" transform="rotate(-30 110 60)"/>
+            <ellipse cx="110" cy="60" rx="22" ry="12" fill="#E8F4FE" opacity=".85" transform="rotate(30 110 60)"/>
+            <ellipse cx="110" cy="60" rx="22" ry="12" fill="#F4E8F8" opacity=".8" transform="rotate(90 110 60)"/>
+            <ellipse cx="110" cy="60" rx="22" ry="12" fill="#F4E8F8" opacity=".8" transform="rotate(-90 110 60)"/>
+            <ellipse cx="110" cy="60" rx="14" ry="18" fill="#FFD6E8" opacity=".9"/>
+            <circle cx="110" cy="60" r="5" fill="#F2A7B8" opacity=".9"/>
+            <!-- flower 2 -->
+            <ellipse cx="100" cy="160" rx="20" ry="11" fill="#E8F4FE" opacity=".8" transform="rotate(-25 100 160)"/>
+            <ellipse cx="100" cy="160" rx="20" ry="11" fill="#E8F4FE" opacity=".8" transform="rotate(25 100 160)"/>
+            <ellipse cx="100" cy="160" rx="20" ry="11" fill="#EEE8F8" opacity=".75" transform="rotate(90 100 160)"/>
+            <ellipse cx="100" cy="160" rx="20" ry="11" fill="#EEE8F8" opacity=".75" transform="rotate(-90 100 160)"/>
+            <ellipse cx="100" cy="160" rx="12" ry="16" fill="#FFD6E8" opacity=".85"/>
+            <circle cx="100" cy="160" r="4" fill="#F2A7B8" opacity=".9"/>
+            <!-- leaves -->
+            <ellipse cx="85" cy="250" rx="8" ry="28" fill="#B8D4C8" opacity=".5" transform="rotate(-20 85 250)"/>
+            <ellipse cx="115" cy="290" rx="8" ry="25" fill="#B8D4C8" opacity=".5" transform="rotate(15 115 290)"/>
+          </svg>
+          <!-- Decorative SVG orchids (right) -->
+          <svg class="orchid orchid-right" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 380 Q105 300 100 200 Q95 120 90 60" stroke="#B8D4E8" stroke-width="3" fill="none" opacity=".6"/>
+            <ellipse cx="90" cy="60" rx="22" ry="12" fill="#E8F4FE" opacity=".85" transform="rotate(30 90 60)"/>
+            <ellipse cx="90" cy="60" rx="22" ry="12" fill="#E8F4FE" opacity=".85" transform="rotate(-30 90 60)"/>
+            <ellipse cx="90" cy="60" rx="22" ry="12" fill="#F4E8F8" opacity=".8" transform="rotate(90 90 60)"/>
+            <ellipse cx="90" cy="60" rx="22" ry="12" fill="#F4E8F8" opacity=".8" transform="rotate(-90 90 60)"/>
+            <ellipse cx="90" cy="60" rx="14" ry="18" fill="#D6E8FF" opacity=".9"/>
+            <circle cx="90" cy="60" r="5" fill="#A8C8F2" opacity=".9"/>
+            <ellipse cx="90" cy="160" rx="20" ry="11" fill="#E8F4FE" opacity=".8" transform="rotate(25 90 160)"/>
+            <ellipse cx="90" cy="160" rx="20" ry="11" fill="#E8F4FE" opacity=".8" transform="rotate(-25 90 160)"/>
+            <ellipse cx="90" cy="160" rx="20" ry="11" fill="#EEE8F8" opacity=".75" transform="rotate(90 90 160)"/>
+            <ellipse cx="90" cy="160" rx="20" ry="11" fill="#EEE8F8" opacity=".75" transform="rotate(-90 90 160)"/>
+            <ellipse cx="90" cy="160" rx="12" ry="16" fill="#D6E8FF" opacity=".85"/>
+            <circle cx="90" cy="160" r="4" fill="#A8C8F2" opacity=".9"/>
+            <ellipse cx="115" cy="250" rx="8" ry="28" fill="#B8D4C8" opacity=".5" transform="rotate(20 115 250)"/>
+            <ellipse cx="85" cy="290" rx="8" ry="25" fill="#B8D4C8" opacity=".5" transform="rotate(-15 85 290)"/>
+          </svg>
+        </div>
+
+        <div class="hero-content">
+          <p class="hero-pre">Un lugar hecho con amor</p>
+          <h1 class="hero-title">Nuestro Espacio</h1>
+          <p class="hero-tagline">Este espacio es para compartir y conocer más sobre nosotros</p>
+
+          <div class="hero-cta">
+            <button class="cta-btn cta-rose" data-section="dates">
+              <span>💑</span> Ideas de Citas
+            </button>
+            <button class="cta-btn cta-blue" data-section="wishlist">
+              <span>🛍️</span> Lista de Deseos
+            </button>
+            <button class="cta-btn cta-mint" data-section="goals">
+              <span>🎯</span> Metas en Común
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUR SPACE SECTION -->
+      <div class="landing-about">
+        <div class="landing-about-inner">
+          <div class="about-deco">❤️</div>
+          <h2 class="about-title">Este espacio es nuestro</h2>
+          <p class="about-text">
+            Aquí vivimos, planeamos y recordamos todo lo que nos hace especiales como pareja.
+            Es un lugar para conocernos mejor, aprender sobre nosotros y sobre cómo hacernos
+            feliz cada día. Desde las citas que soñamos vivir hasta las metas que queremos
+            alcanzar juntos — todo tiene un lugar aquí.
+          </p>
+          <div class="about-pillars">
+            <div class="pillar">
+              <span class="pillar-icon">💑</span>
+              <strong>Vivir momentos</strong>
+              <p>Ideas de citas y planes para disfrutar juntos</p>
+            </div>
+            <div class="pillar">
+              <span class="pillar-icon">💬</span>
+              <strong>Comunicarnos</strong>
+              <p>Un espacio para las charlas importantes</p>
+            </div>
+            <div class="pillar">
+              <span class="pillar-icon">🎯</span>
+              <strong>Crecer juntos</strong>
+              <p>Metas y sueños que construimos como equipo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOW TO USE -->
+      <div class="landing-howto">
+        <div class="landing-section-inner">
+          <h2 class="section-title-lg">¿Cómo funciona?</h2>
+          <p class="section-subtitle">Simple y pensado para los dos</p>
+          <div class="steps-grid">
+            <div class="step-card">
+              <div class="step-num">01</div>
+              <h3>Explora sin iniciar sesión</h3>
+              <p>Puedes ver todas las secciones: ideas de citas, lista de deseos, metas y más, sin necesidad de registrarte.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">02</div>
+              <h3>Crea tu cuenta</h3>
+              <p>Regístrate con un usuario y contraseña para poder agregar contenido, marcar cosas como realizadas y dejar comentarios.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">03</div>
+              <h3>Agrega ideas y sueños</h3>
+              <p>Usa las diferentes secciones para agregar ideas de citas, deseos con links, temas para hablar o metas en común.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">04</div>
+              <h3>Comenta y reacciona</h3>
+              <p>Cada tarjeta tiene un botón de comentarios. Úsalo para añadir notas, reaccionar a una idea o dejar mensajes para el otro.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">05</div>
+              <h3>Registra el progreso</h3>
+              <p>Marca las citas como realizadas, sube fotos a tus metas, actualiza el porcentaje de avance y registra ahorros para viajes.</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">06</div>
+              <h3>Haz crecer este espacio</h3>
+              <p>No hay reglas. Agrégale lo que quieras, borra lo que ya no aplica y mantenlo vivo. Es de los dos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="landing-faq">
+        <div class="landing-section-inner">
+          <h2 class="section-title-lg">Preguntas frecuentes</h2>
+          <p class="section-subtitle">Todo lo que necesitas saber</p>
+          <div class="faq-list">
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Necesito registrarme para ver el contenido?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                No. Puedes ver todas las secciones y su contenido sin iniciar sesión.
+                Solo necesitas una cuenta para agregar, editar o comentar.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Cuántas cuentas se pueden crear?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                Las que quieras. Lo ideal es que cada persona tenga su propia cuenta
+                para que se sepa quién agregó cada cosa. Así se personaliza más el espacio.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Puedo agregar links de productos en la lista de deseos?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                Sí. Al agregar un deseo tienes un campo para pegar el link del producto.
+                Se mostrará como un enlace directo en la tarjeta para que sea fácil encontrarlo.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Cómo funciona el ahorro para viajes?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                Creas una meta con el monto total que necesitas y la fecha tentativa del viaje.
+                Luego van registrando aportaciones y la barra de progreso se actualiza automáticamente.
+                También hay espacio para anotar las mejores fechas para viajar y lo que quieren hacer ahí.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Puedo subir fotos a las metas?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                Sí. En cada meta hay un espacio para subir una foto de inspiración o del progreso.
+                La imagen se comprime automáticamente para que no ocupe demasiado espacio.
+              </div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question">
+                ¿Se pueden borrar cosas?
+                <span class="faq-arrow">▼</span>
+              </button>
+              <div class="faq-answer">
+                Sí, cualquier usuario con sesión iniciada puede eliminar contenido.
+                Los cambios son permanentes, así que confirma antes de borrar.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <p class="footer-brand">Nuestro Espacio 💕</p>
+          <p class="footer-sub">Hecho con amor para los dos</p>
+          <div class="footer-links">
+            <button class="footer-link" data-section="dates">Ideas de Citas</button>
+            <button class="footer-link" data-section="wishlist">Lista de Deseos</button>
+            <button class="footer-link" data-section="talks">Charlas</button>
+            <button class="footer-link" data-section="savings">Ahorros</button>
+            <button class="footer-link" data-section="goals">Metas</button>
+          </div>
+          <p class="footer-copy">© 2025 · Solo para nosotros ❤️</p>
+        </div>
+      </footer>
+
+    </section>
+
+    <!-- ── DATE IDEAS ──────────────────────────────────────────────────── -->
+    <section id="section-dates" class="section content-section">
+      <div class="section-header">
+        <div>
+          <h2>Ideas de Citas</h2>
+          <p class="section-desc">Lugares, planes y aventuras que quieren vivir juntos</p>
+        </div>
+        <button class="btn-add auth-required" data-modal="modal-date">+ Agregar idea</button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="pending">Pendientes</button>
+        <button class="filter-btn" data-filter="done">Realizadas</button>
+      </div>
+      <div id="dates-list" class="cards-grid"></div>
+    </section>
+
+    <!-- ── WISHLIST ────────────────────────────────────────────────────── -->
+    <section id="section-wishlist" class="section content-section">
+      <div class="section-header">
+        <div>
+          <h2>Lista de Deseos</h2>
+          <p class="section-desc">Cosas que quieren tener o regalar</p>
+        </div>
+        <button class="btn-add auth-required" data-modal="modal-wish">+ Agregar deseo</button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="alta">Alta prioridad</button>
+        <button class="filter-btn" data-filter="media">Media</button>
+        <button class="filter-btn" data-filter="baja">Baja</button>
+        <button class="filter-btn" data-filter="purchased">Comprados</button>
+      </div>
+      <div id="wishlist-list" class="cards-grid"></div>
+    </section>
+
+    <!-- ── TALKS ──────────────────────────────────────────────────────── -->
+    <section id="section-talks" class="section content-section">
+      <div class="section-header">
+        <div>
+          <h2>Charlas Pendientes</h2>
+          <p class="section-desc">Temas importantes para hablar juntos</p>
+        </div>
+        <button class="btn-add auth-required" data-modal="modal-talk">+ Agregar tema</button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="pending">Pendientes</button>
+        <button class="filter-btn" data-filter="resolved">Resueltos</button>
+      </div>
+      <div id="talks-list" class="cards-grid"></div>
+    </section>
+
+    <!-- ── SAVINGS ────────────────────────────────────────────────────── -->
+    <section id="section-savings" class="section content-section">
+      <div class="section-header">
+        <div>
+          <h2>Ahorro para Viajes</h2>
+          <p class="section-desc">Metas de ahorro para sus aventuras juntos</p>
+        </div>
+        <button class="btn-add auth-required" data-modal="modal-saving">+ Nueva meta</button>
+      </div>
+      <div id="savings-list" class="savings-stack"></div>
+    </section>
+
+    <!-- ── GOALS ──────────────────────────────────────────────────────── -->
+    <section id="section-goals" class="section content-section">
+      <div class="section-header">
+        <div>
+          <h2>Metas en Común</h2>
+          <p class="section-desc">Proyectos y sueños que construyen juntos</p>
+        </div>
+        <button class="btn-add auth-required" data-modal="modal-goal">+ Agregar meta</button>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="pendiente">Pendientes</button>
+        <button class="filter-btn" data-filter="en progreso">En progreso</button>
+        <button class="filter-btn" data-filter="completada">Completadas</button>
+      </div>
+      <div id="goals-list" class="goals-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- ════════ MODALS ════════════════════════════════════════════════════ -->
+
+  <div id="modal-login" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-login">&times;</button>
+      <h3 id="auth-modal-title">Iniciar sesión</h3>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Usuario</label>
+          <input type="text" id="login-username" placeholder="tu_usuario" required />
+        </div>
+        <div id="register-name-field" class="form-group hidden">
+          <label>Nombre bonito</label>
+          <input type="text" id="login-displayname" placeholder="Como quieres que te llamen" />
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary full-width" id="login-submit-btn">Entrar</button>
+        <p class="auth-switch">¿No tienes cuenta? <a href="#" id="switch-to-register">Regístrate</a></p>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-date" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-date">&times;</button>
+      <h3>Nueva Idea de Cita 💑</h3>
+      <form id="form-date">
+        <div class="form-group"><label>¿Qué quieren hacer?</label><input type="text" name="title" placeholder="Ej: Cena a la luz de velas" required /></div>
+        <div class="form-group"><label>Descripción</label><textarea name="description" placeholder="Detalles del plan..."></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Lugar</label><input type="text" name="location" placeholder="Ej: Restaurante el Mar" /></div>
+          <div class="form-group"><label>Presupuesto</label><input type="text" name="budget" placeholder="Ej: $500" /></div>
+        </div>
+        <button type="submit" class="btn-primary full-width">Guardar idea</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-wish" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-wish">&times;</button>
+      <h3>Nuevo Deseo 🛍️</h3>
+      <form id="form-wish">
+        <div class="form-group"><label>¿Qué quieres?</label><input type="text" name="title" placeholder="Ej: Perfume Dior" required /></div>
+        <div class="form-group"><label>Link del producto</label><input type="url" name="url" placeholder="https://..." /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Precio</label><input type="text" name="price" placeholder="Ej: $1,200" /></div>
+          <div class="form-group"><label>Prioridad</label>
+            <select name="priority">
+              <option value="alta">Alta</option>
+              <option value="media" selected>Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Notas</label><textarea name="notes" placeholder="Talla, color, por qué lo quieres..."></textarea></div>
+        <button type="submit" class="btn-primary full-width">Agregar a la lista</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-talk" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-talk">&times;</button>
+      <h3>Tema Pendiente 💬</h3>
+      <form id="form-talk">
+        <div class="form-group"><label>¿Sobre qué quieren hablar?</label><input type="text" name="title" placeholder="Ej: Planes para el siguiente año" required /></div>
+        <div class="form-group"><label>Descripción</label><textarea name="description" placeholder="Más detalles sobre el tema..."></textarea></div>
+        <div class="form-group"><label>Prioridad</label>
+          <select name="priority">
+            <option value="urgente">Urgente</option>
+            <option value="normal" selected>Normal</option>
+            <option value="cuando puedan">Cuando puedan</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary full-width">Agregar tema</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-saving" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-saving">&times;</button>
+      <h3>Meta de Ahorro ✈️</h3>
+      <form id="form-saving">
+        <div class="form-group"><label>Nombre del viaje</label><input type="text" name="title" placeholder="Ej: Vacaciones en Cancún" required /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Destino</label><input type="text" name="destination" placeholder="Ej: Cancún, México" /></div>
+          <div class="form-group"><label>Emoji</label><input type="text" name="emoji" placeholder="✈️" maxlength="4" value="✈️" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Meta de ahorro ($)</label><input type="number" name="target_amount" placeholder="15000" required min="1" /></div>
+          <div class="form-group"><label>Fecha tentativa</label><input type="date" name="target_date" /></div>
+        </div>
+        <button type="submit" class="btn-primary full-width">Crear meta</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-contribute" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-contribute">&times;</button>
+      <h3 id="contribute-title">Agregar Aportación 💰</h3>
+      <form id="form-contribute">
+        <input type="hidden" name="goal_id" />
+        <div class="form-group"><label>Monto ($)</label><input type="number" name="amount" placeholder="500" required min="1" /></div>
+        <div class="form-group"><label>Nota</label><input type="text" name="note" placeholder="Ej: Quincena de enero" /></div>
+        <button type="submit" class="btn-primary full-width">Agregar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-goal" class="modal-overlay hidden">
+    <div class="modal">
+      <button class="modal-close" data-close="modal-goal">&times;</button>
+      <h3>Nueva Meta en Común 🎯</h3>
+      <form id="form-goal">
+        <div class="form-group"><label>¿Cuál es la meta?</label><input type="text" name="title" placeholder="Ej: Comprar nuestro depa" required /></div>
+        <div class="form-group"><label>Descripción</label><textarea name="description" placeholder="¿Cómo la van a lograr?"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Categoría</label>
+            <select name="category">
+              <option value="hogar">🏠 Hogar</option>
+              <option value="viaje">✈️ Viaje</option>
+              <option value="finanzas">💰 Finanzas</option>
+              <option value="salud">💚 Salud</option>
+              <option value="familia">👨‍👩‍👧 Familia</option>
+              <option value="general" selected>🎯 General</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Emoji</label><input type="text" name="emoji" placeholder="🎯" maxlength="4" value="🎯" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Fecha objetivo</label><input type="date" name="target_date" /></div>
+          <div class="form-group"><label>¿Cuándo quiero hacerlo?</label><input type="text" name="when_to_do" placeholder="Ej: Este verano" /></div>
+        </div>
+        <button type="submit" class="btn-primary full-width">Guardar meta</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- COMMENT PANEL -->
+  <div id="panel-comments" class="side-panel hidden">
+    <div class="panel-inner">
+      <button id="panel-close" class="modal-close" style="position:absolute;top:16px;right:18px;">&times;</button>
+      <h3 id="panel-title">Comentarios</h3>
+      <div id="comments-list"></div>
+      <div id="comment-form-area" class="comment-form hidden">
+        <textarea id="comment-input" placeholder="Escribe un comentario... (Ctrl+Enter para enviar)"></textarea>
+        <button id="comment-submit" class="btn-primary">Enviar</button>
+      </div>
+      <p id="comment-login-note" class="auth-note hidden">Inicia sesión para comentar</p>
+    </div>
+  </div>
+  <div id="panel-overlay" class="panel-backdrop hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
