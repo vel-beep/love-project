@@ -439,6 +439,10 @@ async function seedDatabase() {
 }
 
 app.listen(PORT, async () => {
-  await seedDatabase();
   console.log(`💕 Love Project corriendo en http://localhost:${PORT}`);
+  if (process.env.MONGODB_URI) {
+    await seedDatabase();
+  } else {
+    console.log('⚠️  Sin MONGODB_URI — modo sin base de datos');
+  }
 });
