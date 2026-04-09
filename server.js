@@ -14,8 +14,11 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const HAS_DB = !!process.env.MONGODB_URI;
+
 /* ── helpers ── */
 function requireAuth(req, res, next) {
+  if (!HAS_DB) return res.status(503).json({ error: 'Base de datos no configurada aún' });
   const auth = req.headers.authorization;
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'No autenticado' });
   try { req.user = jwt.verify(auth.slice(7), JWT_SECRET); next(); }
@@ -28,6 +31,11 @@ function fmt(doc) {
   return { id: _id.toString(), ...rest };
 }
 const fmtAll = docs => docs.map(fmt);
+
+// IDs ficticios para datos estáticos
+let _sid = 1;
+function staticId() { return String(_sid++); }
+function withId(arr) { _sid = 1; return arr.map(d => ({ id: staticId(), ...d, done: false, purchased: false, resolved: false, created_at: new Date().toISOString(), display_name: '💕 Ejemplo' })); }
 
 /* ══ AUTH ════════════════════════════════════════════════════════════════ */
 app.post('/api/auth/register', async (req, res) => {
@@ -63,6 +71,7 @@ app.get('/api/auth/me', requireAuth, (req, res) => res.json(req.user));
 
 /* ══ COMMENTS ══════════════════════════════════════════════════════════ */
 app.get('/api/comments/:section/:itemId', async (req, res) => {
+  if (!HAS_DB) return res.json([]);
   try {
     const db = await getDb();
     const docs = await db.collection('comments')
@@ -85,6 +94,7 @@ app.post('/api/comments', requireAuth, async (req, res) => {
 
 /* ══ DATE IDEAS ═════════════════════════════════════════════════════════ */
 app.get('/api/date-ideas', async (req, res) => {
+  if (!HAS_DB) return res.json(withId(DATE_IDEAS_SEED));
   try {
     const db = await getDb();
     res.json(fmtAll(await db.collection('date_ideas').find({}).sort({ created_at: -1 }).toArray()));
@@ -120,6 +130,7 @@ app.delete('/api/date-ideas/:id', requireAuth, async (req, res) => {
 
 /* ══ WISHLIST ═══════════════════════════════════════════════════════════ */
 app.get('/api/wishlist', async (req, res) => {
+  if (!HAS_DB) return res.json(withId(WISHLIST_SEED));
   try {
     const db = await getDb();
     res.json(fmtAll(await db.collection('wishlist').find({}).sort({ created_at: -1 }).toArray()));
@@ -155,6 +166,7 @@ app.delete('/api/wishlist/:id', requireAuth, async (req, res) => {
 
 /* ══ TALKS ══════════════════════════════════════════════════════════════ */
 app.get('/api/talks', async (req, res) => {
+  if (!HAS_DB) return res.json(withId(TALKS_SEED));
   try {
     const db = await getDb();
     res.json(fmtAll(await db.collection('talks').find({}).sort({ created_at: -1 }).toArray()));
@@ -190,6 +202,26 @@ app.delete('/api/talks/:id', requireAuth, async (req, res) => {
 
 /* ══ SAVINGS ════════════════════════════════════════════════════════════ */
 app.get('/api/savings', async (req, res) => {
+  if (!HAS_DB) return res.json([{
+    id: '1', title: 'Viaje a la playa', destination: 'Cancún, México', emoji: '🏖️',
+    target_amount: 20000, current_amount: 8500, target_date: '2025-12-01',
+    best_dates: 'Julio o diciembre, temporada baja', activities: 'Snorkel, cenotes, zona hotelera',
+    deadline_note: 'Reservar vuelos antes de octubre', display_name: '💕 Ejemplo',
+    contributions: [
+      { id: '1', amount: 5000, note: 'Enero', display_name: '💕 Ejemplo' },
+      { id: '2', amount: 2000, note: 'Febrero', display_name: '💕 Ejemplo' },
+      { id: '3', amount: 1500, note: 'Marzo', display_name: '💕 Ejemplo' },
+    ]
+  }, {
+    id: '2', title: 'Europa juntos', destination: 'París + Roma', emoji: '🗼',
+    target_amount: 80000, current_amount: 15000, target_date: '2026-06-01',
+    best_dates: 'Primavera (abril-mayo), sin multitudes', activities: 'Torre Eiffel, Coliseo, museos, cafés',
+    deadline_note: 'Vuelos con 6 meses de anticipación', display_name: '💕 Ejemplo',
+    contributions: [
+      { id: '3', amount: 10000, note: 'Ahorro inicial', display_name: '💕 Ejemplo' },
+      { id: '4', amount: 5000, note: 'Extra de diciembre', display_name: '💕 Ejemplo' },
+    ]
+  }]);
   try {
     const db = await getDb();
     const goals = fmtAll(await db.collection('saving_goals').find({}).sort({ created_at: -1 }).toArray());
@@ -246,6 +278,7 @@ app.delete('/api/savings/:id', requireAuth, async (req, res) => {
 
 /* ══ GOALS ══════════════════════════════════════════════════════════════ */
 app.get('/api/goals', async (req, res) => {
+  if (!HAS_DB) return res.json(withId(GOALS_SEED));
   try {
     const db = await getDb();
     res.json(fmtAll(await db.collection('goals').find({}).sort({ created_at: -1 }).toArray()));
