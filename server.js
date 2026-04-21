@@ -6,15 +6,54 @@ const path       = require('path');
 
 const app        = express();
 const PORT       = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'love-project-secret-2024';
-const HAS_DB     = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY);
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET no configurado o muy corto (mínimo 32 caracteres).');
+  process.exit(1);
+}
+const HAS_DB = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY);
 
 let sb = null;
 if (HAS_DB) sb = require('./database');
 
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+/* ── CORS ── solo permite el origen configurado o same-origin */
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '';
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || (ALLOWED_ORIGIN && origin === ALLOWED_ORIGIN)) return cb(null, true);
+    cb(new Error('Origen no permitido por CORS'));
+  },
+  credentials: true,
+}));
+
+/* ── Security headers ── */
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+/* ── Rate limiter básico (en memoria) ── */
+const _rateCounts = new Map();
+function rateLimit(maxReq, windowMs) {
+  return (req, res, next) => {
+    const key = req.ip + req.path;
+    const now = Date.now();
+    const entry = _rateCounts.get(key) || { count: 0, start: now };
+    if (now - entry.start > windowMs) { entry.count = 0; entry.start = now; }
+    entry.count++;
+    _rateCounts.set(key, entry);
+    if (entry.count > maxReq) return res.status(429).json({ error: 'Demasiados intentos. Espera un momento.' });
+    next();
+  };
+}
+
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+const VALID_SECTIONS = new Set(['date-ideas', 'wishlist', 'talks', 'savings', 'goals']);
 
 /* ── helpers ── */
 function requireAuth(req, res, next) {
@@ -58,38 +97,44 @@ function withId(arr, extra = {}) {
 }
 
 /* ══ AUTH ════════════════════════════════════════════════════════════════ */
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', rateLimit(5, 15 * 60 * 1000), async (req, res) => {
   if (!HAS_DB) return res.status(503).json({ error: 'Base de datos no configurada' });
   try {
     const { username, password, display_name } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
+    if (typeof username !== 'string' || !/^[a-zA-Z0-9_]{3,30}$/.test(username))
+      return res.status(400).json({ error: 'El usuario debe tener 3-30 caracteres alfanuméricos' });
+    if (typeof password !== 'string' || password.length < 8)
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
     const existing = await sb.from('users').select('id').eq('username', username).single();
     if (existing.data) return res.status(409).json({ error: 'El usuario ya existe' });
-    const hash = bcrypt.hashSync(password, 10);
-    const name = display_name || username;
+    const hash = bcrypt.hashSync(password, 12);
+    const name = (typeof display_name === 'string' ? display_name.trim().slice(0, 50) : '') || username;
     const { data, error } = await sb.from('users').insert({ username, password_hash: hash, display_name: name }).select().single();
     if (error) throw new Error(error.message);
-    const token = jwt.sign({ id: data.id, username, display_name: name }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: data.id, username, display_name: name }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: data.id, username, display_name: name } });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', rateLimit(10, 15 * 60 * 1000), async (req, res) => {
   if (!HAS_DB) return res.status(503).json({ error: 'Base de datos no configurada' });
   try {
     const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Faltan datos' });
     const { data: user } = await sb.from('users').select('*').eq('username', username).single();
     if (!user || !bcrypt.compareSync(password, user.password_hash))
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
-    const token = jwt.sign({ id: user.id, username: user.username, display_name: user.display_name }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, username: user.username, display_name: user.display_name }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, username: user.username, display_name: user.display_name } });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.get('/api/auth/me', requireAuth, (req, res) => res.json(req.user));
 
 /* ══ COMMENTS ══════════════════════════════════════════════════════════ */
 app.get('/api/comments/:section/:itemId', async (req, res) => {
+  if (!VALID_SECTIONS.has(req.params.section)) return res.status(400).json({ error: 'Sección inválida' });
   if (!HAS_DB) return res.json([]);
   try {
     const { data, error } = await sb.from('comments')
@@ -99,23 +144,25 @@ app.get('/api/comments/:section/:itemId', async (req, res) => {
       .order('created_at', { ascending: true });
     if (error) throw new Error(error.message);
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/comments', requireAuth, async (req, res) => {
   try {
     const { section, item_id, text } = req.body;
     if (!section || !item_id || !text) return res.status(400).json({ error: 'Faltan datos' });
-    const data = await dbInsert('comments', { section, item_id: String(item_id), text, created_by: req.user.id, display_name: req.user.display_name });
+    if (!VALID_SECTIONS.has(section)) return res.status(400).json({ error: 'Sección inválida' });
+    if (typeof text !== 'string' || text.trim().length === 0 || text.length > 1000) return res.status(400).json({ error: 'Comentario inválido' });
+    const data = await dbInsert('comments', { section, item_id: String(item_id), text: text.trim(), created_by: req.user.id, display_name: req.user.display_name });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 /* ══ DATE IDEAS ═════════════════════════════════════════════════════════ */
 app.get('/api/date-ideas', async (req, res) => {
   if (!HAS_DB) return res.json(withId(DATE_IDEAS_SEED, { done: false }));
   try { res.json(await dbGet('date_ideas')); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/date-ideas', requireAuth, async (req, res) => {
@@ -124,50 +171,56 @@ app.post('/api/date-ideas', requireAuth, async (req, res) => {
     if (!title) return res.status(400).json({ error: 'El título es requerido' });
     const data = await dbInsert('date_ideas', { title, description, location, budget, done: false, created_by: req.user.id, display_name: req.user.display_name });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.patch('/api/date-ideas/:id', requireAuth, async (req, res) => {
   try { await dbUpdate('date_ideas', req.params.id, { done: !!req.body.done }); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.delete('/api/date-ideas/:id', requireAuth, async (req, res) => {
   try { await dbDelete('date_ideas', req.params.id); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 /* ══ WISHLIST ═══════════════════════════════════════════════════════════ */
 app.get('/api/wishlist', async (req, res) => {
   if (!HAS_DB) return res.json(withId(WISHLIST_SEED, { purchased: false }));
   try { res.json(await dbGet('wishlist')); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/wishlist', requireAuth, async (req, res) => {
   try {
     const { title, url, price, priority, notes } = req.body;
     if (!title) return res.status(400).json({ error: 'El título es requerido' });
-    const data = await dbInsert('wishlist', { title, url, price, priority: priority || 'media', notes, purchased: false, created_by: req.user.id, display_name: req.user.display_name });
+    if (url) {
+      try {
+        const u = new URL(url);
+        if (!['http:', 'https:'].includes(u.protocol)) return res.status(400).json({ error: 'URL debe ser http o https' });
+      } catch { return res.status(400).json({ error: 'URL inválida' }); }
+    }
+    const data = await dbInsert('wishlist', { title, url: url || null, price, priority: priority || 'media', notes, purchased: false, created_by: req.user.id, display_name: req.user.display_name });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.patch('/api/wishlist/:id', requireAuth, async (req, res) => {
   try { await dbUpdate('wishlist', req.params.id, { purchased: !!req.body.purchased }); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.delete('/api/wishlist/:id', requireAuth, async (req, res) => {
   try { await dbDelete('wishlist', req.params.id); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 /* ══ TALKS ══════════════════════════════════════════════════════════════ */
 app.get('/api/talks', async (req, res) => {
   if (!HAS_DB) return res.json(withId(TALKS_SEED, { resolved: false }));
   try { res.json(await dbGet('talks')); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/talks', requireAuth, async (req, res) => {
@@ -176,17 +229,17 @@ app.post('/api/talks', requireAuth, async (req, res) => {
     if (!title) return res.status(400).json({ error: 'El título es requerido' });
     const data = await dbInsert('talks', { title, description, priority: priority || 'normal', resolved: false, created_by: req.user.id, display_name: req.user.display_name });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.patch('/api/talks/:id', requireAuth, async (req, res) => {
   try { await dbUpdate('talks', req.params.id, { resolved: !!req.body.resolved }); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.delete('/api/talks/:id', requireAuth, async (req, res) => {
   try { await dbDelete('talks', req.params.id); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 /* ══ SAVINGS ════════════════════════════════════════════════════════════ */
@@ -218,7 +271,7 @@ app.get('/api/savings', async (req, res) => {
       contributions: await dbGet('contributions', { goal_id: g.id })
     })));
     res.json(result);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/savings', requireAuth, async (req, res) => {
@@ -227,7 +280,7 @@ app.post('/api/savings', requireAuth, async (req, res) => {
     if (!title || !target_amount) return res.status(400).json({ error: 'Faltan datos' });
     const data = await dbInsert('saving_goals', { title, destination, target_amount: Number(target_amount), current_amount: 0, target_date, emoji: emoji || '✈️', best_dates: '', activities: '', deadline_note: '', created_by: req.user.id, display_name: req.user.display_name });
     res.json({ ...data, contributions: [] });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.patch('/api/savings/:id', requireAuth, async (req, res) => {
@@ -237,7 +290,7 @@ app.patch('/api/savings/:id', requireAuth, async (req, res) => {
     allowed.forEach(k => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
     if (Object.keys(patch).length) await dbUpdate('saving_goals', req.params.id, patch);
     res.json({ ok: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/savings/:id/contribute', requireAuth, async (req, res) => {
@@ -248,21 +301,21 @@ app.post('/api/savings/:id/contribute', requireAuth, async (req, res) => {
     const { data: goal } = await sb.from('saving_goals').select('current_amount').eq('id', req.params.id).single();
     await dbUpdate('saving_goals', req.params.id, { current_amount: (goal?.current_amount || 0) + Number(amount) });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.delete('/api/savings/:id', requireAuth, async (req, res) => {
   try {
     await dbDelete('saving_goals', req.params.id);
     res.json({ ok: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 /* ══ GOALS ══════════════════════════════════════════════════════════════ */
 app.get('/api/goals', async (req, res) => {
   if (!HAS_DB) return res.json(withId(GOALS_SEED));
   try { res.json(await dbGet('goals')); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.post('/api/goals', requireAuth, async (req, res) => {
@@ -271,7 +324,7 @@ app.post('/api/goals', requireAuth, async (req, res) => {
     if (!title) return res.status(400).json({ error: 'El título es requerido' });
     const data = await dbInsert('goals', { title, description, category: category || 'general', status: 'pendiente', target_date, when_to_do: when_to_do || '', emoji: emoji || '🎯', progress_percent: 0, photo: '', created_by: req.user.id, display_name: req.user.display_name });
     res.json(data);
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.patch('/api/goals/:id', requireAuth, async (req, res) => {
@@ -281,17 +334,20 @@ app.patch('/api/goals/:id', requireAuth, async (req, res) => {
     allowed.forEach(k => { if (req.body[k] !== undefined) patch[k] = req.body[k]; });
     if (Object.keys(patch).length) await dbUpdate('goals', req.params.id, patch);
     res.json({ ok: true });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
 app.delete('/api/goals/:id', requireAuth, async (req, res) => {
   try { await dbDelete('goals', req.params.id); res.json({ ok: true }); }
-  catch(e) { res.status(500).json({ error: e.message }); }
+  catch(e) { console.error(e.message); res.status(500).json({ error: 'Error interno del servidor' }); }
 });
 
-/* ══ SEED ENDPOINT (llamar una sola vez) ════════════════════════════════ */
-app.get('/api/seed', async (req, res) => {
+/* ══ SEED ENDPOINT (llamar una sola vez, solo desde server) ═════════════ */
+app.post('/api/seed', requireAuth, async (req, res) => {
   if (!HAS_DB) return res.status(503).json({ error: 'Sin base de datos' });
+  const adminToken = process.env.SEED_TOKEN;
+  if (!adminToken || req.body.token !== adminToken)
+    return res.status(403).json({ error: 'No autorizado' });
   try {
     const { count } = await sb.from('date_ideas').select('*', { count: 'exact', head: true });
     if (count > 0) return res.json({ ok: true, message: `Ya hay ${count} ideas de citas. No se volvió a insertar.` });
@@ -304,7 +360,7 @@ app.get('/api/seed', async (req, res) => {
 
     res.json({ ok: true, message: '✅ Datos de ejemplo insertados correctamente' });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 

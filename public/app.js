@@ -36,11 +36,12 @@ async function initAuth() {
 
 function renderLoggedIn() {
   const area = document.getElementById('auth-area');
-  const initials = (currentUser.display_name || currentUser.username).slice(0,2).toUpperCase();
+  const name = esc(currentUser.display_name || currentUser.username);
+  const initials = esc((currentUser.display_name || currentUser.username).slice(0,2).toUpperCase());
   area.innerHTML = `
     <div class="user-badge">
       <div class="user-avatar">${initials}</div>
-      <span>${currentUser.display_name || currentUser.username}</span>
+      <span>${name}</span>
     </div>
     <button class="btn-outline" id="btn-logout">Salir</button>
   `;
@@ -284,7 +285,7 @@ function renderWishCard(item) {
       ${item.purchased ? `<span class="tag tag-mint">✅ Comprado</span>` : ''}
     </div>
     ${item.notes ? `<p class="card-desc">${esc(item.notes)}</p>` : ''}
-    ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener" class="card-link">${truncUrl(item.url)}</a>` : ''}
+    ${item.url ? `<a href="${safeUrl(item.url)}" target="_blank" rel="noopener" class="card-link">${esc(truncUrl(item.url))}</a>` : ''}
     <div class="card-footer">
       ${currentUser ? `
         <label class="checkbox-done">
@@ -765,6 +766,13 @@ function compressImage(file, maxW = 800, maxH = 600, quality = 0.75) {
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeUrl(url) {
+  if (!url) return '#';
+  try {
+    const u = new URL(url);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
+  } catch { return '#'; }
 }
 function truncUrl(url) {
   try { const u = new URL(url); return u.hostname; } catch { return url.slice(0,30); }
